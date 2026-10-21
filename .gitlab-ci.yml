@@ -6,6 +6,7 @@ image: mcr.microsoft.com/dotnet/sdk:10.0
 stages:
   - config
   - test
+  - build
 
 Test:
   stage: test
@@ -13,3 +14,11 @@ Test:
     - dotnet restore
     - dotnet test
   allow_failure: false
+  only: branches
+
+Build:
+  stage: build
+  script:
+    - dotnet restore
+    - dotnet build
+  only: branches
