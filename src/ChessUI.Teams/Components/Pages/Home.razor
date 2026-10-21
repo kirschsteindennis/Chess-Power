@@ -1,0 +1,172 @@
+﻿@page "/"
+@implements IDisposable
+@using Microsoft.Extensions.Hosting
+@inject IJSRuntime JS
+@inject MatchService Matches
+@inject ITeamsTokenValidator TokenValidator
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
+
+<PageTitle>Chess Power</PageTitle>
+
+@if (!contextLoaded)
+{
+    <MenuPanel Title="Chess Power">
+        <p class="menu-reason">Connection to Teams...</p>
+    </MenuPanel>
+}
+else if (context is null)
+{
+    <MenuPanel Title="ChessPower">
+        <p class="menu-reason">@(message ?? "Please open this app in a Teams chat.")</p>
+    </MenuPanel>
+}
+else if (session is null)
+{
+    <MenuPanel Title="Chess Power">
+        <MenuButton Text="Find Opponent" OnClick="FindOpponent" />
+        @if (message is not null)
+        {
+            <p class="menu-reason">@message</p>
+        }
+    </MenuPanel>
+}
+else if (!session.HasStarted)
+{
+    <MenuPanel Title="Waiting...">
+        <p class="menu-reason">Waiting for another person in this chat to open the game</p>
+        <MenuButton Text="Cancel" OnClick="CancelWaiting"/>
+    </MenuPanel>
+}
+else
+{
+    <ChessBoard @key="session" Session="session">
+        <GameOverActions>
+            <MenuButton Text="NEW GAME" OnClick="NewGame" />
+            <MenuButton Text="BACK" OnClick="Leave" />
+        </GameOverActions>
+    </ChessBoard>
+
+    @if (session.CanResign)
+    {
+        <div class="action-row">
+            @if (confirmResign)
+            {
+                <MenuButton Text="Yes, resign" OnClick="Resign" />
+                <MenuButton Text="No" OnClick="CancelResign" />
+            } else
+            {
+                <MenuButton Text="Resign" OnClick="AskResign" />
+            }
+        </div>
+    }
+}
+
+@code {
+    // Only for local testing without Teams, e.g. /?chat=demo&user=anna
+    [Parameter, SupplyParameterFromQuery(Name = "chat")] public string DevChat { get; set; }
+    [Parameter, SupplyParameterFromQuery(Name = "user")] public string DevUser { get; set; }
+
+    private TeamsContext context;
+    private bool contextLoaded;
+    private OnlineGameSession session;
+    private string message;
+    private bool confirmResign;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        context = await LoadContextAsync();
+        contextLoaded = true;
+        StateHasChanged();
+    }
+
+    private async Task<TeamsContext> LoadContextAsync()
+    {
+        TeamsContext fromTeams = await JS.InvokeAsync<TeamsContext>("chessTeams.getContext");
+
+        if (fromTeams is not null)
+        {
+            if (fromTeams.ChatId is null)
+            {
+                message = "Please open this app in a Teams Chat";
+                return null;
+            }
+
+            string token = await JS.InvokeAsync<string>("chessTeams.getAuthToken");
+            TeamsIdentity identity = await TokenValidator.ValidateAsync(token);
+
+            if (identity is null)
+            {
+                message = "Sign-in with Teams failed.";
+                return null;
+            }
+
+            // The Tenant goes in front of both IDs, so two companies can never collide
+            return new TeamsContext(
+                $"{identity.TenantId}:{fromTeams.ChatId}",
+                $"{identity.TenantId}:{identity.UserId}");
+        }
+
+        if (Env.IsDevelopment() && DevChat is not null && DevUser is not null)
+            return new TeamsContext(DevChat, DevUser);
+
+        return null;
+    }
+
+    private void FindOpponent()
+    {
+        message = null;
+
+        ChessMatch match = Matches.FindOrCreate(context.ChatId, context.UserId);
+
+        if (match is null)
+        {
+            message = "Two other people are already playing in this chat.";
+            return;
+        }
+
+        session = new OnlineGameSession(match, context.UserId);
+        session.Changed += OnSessionChanged;
+    }
+
+    private void NewGame()
+    {
+        Leave();
+        FindOpponent(); 
+    }
+
+    private void CancelWaiting()
+    {
+        Matches.CancelWaiting(context.ChatId, context.UserId);
+        Leave();
+    }
+
+    private void AskResign() => confirmResign = true;
+
+    private void CancelResign() => confirmResign = false;
+
+    private void Resign()
+    {
+        confirmResign = false;
+        session.Resign();
+    }
+
+    private void Leave()
+    {
+        confirmResign = false;
+
+        if (session is null)
+            return;
+
+        session.Changed -= OnSessionChanged;
+        session.Dispose();
+        session = null;
+    }
+
+    // The event comes from the other player's connection, so we must switch to our own render thread
+    private void OnSessionChanged() => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Leave();
+}

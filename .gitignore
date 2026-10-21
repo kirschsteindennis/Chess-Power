@@ -1,0 +1,77 @@
+# Build Ergebnisse
+bin/
+obj/
+publish_output/
+
+# Nutzer spezifische Dateien
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code spezifisch
+.vscode/
+
+# Rider spezifisch
+.idea/
+
+# Paket-Manager
+packages/
+
+# Log-Dateien
+*.log
+
+# Temporary Dateien
+*.temp
+*.tmp
+~*
+
+# Backup Dateien
+*.bak
+*.old
+*.orig
+*.save
+
+# Sonstiges
+*.vspscc
+*.vssscc
+_ReSharper*/
+*.resharper*
+*.DotSettings.user
+
+# Dependency Direktories
+node_modules/
+bower_components/
+
+# Environment- und Konfigurationsdateien
+.env
+.env.*
+
+# Publish Web Projects
+*.publishxml
+*.pubxml.user
+
+# Projekt speicherbezogene Dateien
+.DS_Store
+Thumbs.db
+
+# Visual Studio spezifisch
+.vs/
+
+# Lokale Testdaten
+TestResults/
+
+# NuGet
+*.nupkg
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Temporäre Schlüssel
+*.pfx
+*.p12
+
+# Datenbank Datei
+basis_lexikon.db

@@ -1,0 +1,17 @@
+﻿@page "/config"
+
+<PageTitle>Chess Power</PageTitle>
+
+<MenuPanel Title="Chess Power">
+    <p class="menu-reason">Press "Save" to add Chess Power to this chat.</p>
+</MenuPanel>
+
+@code {
+    [Inject] private IJSRuntime JS { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await JS.InvokeVoidAsync("chessTeams.registerConfig");
+    }
+}

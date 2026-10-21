@@ -1,0 +1,26 @@
+@if (session is null) {
+    <MenuPanel Title="Chess Power">
+        <MenuButton Text="Easy" OnClick="() => Start(AIDifficulty.Easy)"/>
+        <MenuButton Text="Medium" OnClick="() => Start(AIDifficulty.Medium)"/>
+        <MenuButton Text="Hard" OnClick="() => Start(AIDifficulty.Hard)"/>
+        <MenuButton Text="Quit" OnClick="Quit"/>
+    </MenuPanel>
+}
+else {
+    <ChessBoard @key="session" Session="session">
+        <GameOverActions>
+            <MenuButton Text="RESTART" OnClick="BackToMenu" />
+            <MenuButton Text="EXIT" OnClick="Quit" />
+        </GameOverActions>
+    </ChessBoard>
+}
+
+@code {
+    private IGameSession session;
+
+    private void Start(AIDifficulty difficulty) => session = new AiGameSession(difficulty);
+
+    private void BackToMenu() => session = null;
+
+    private void Quit() => System.Windows.Application.Current.Shutdown();
+}

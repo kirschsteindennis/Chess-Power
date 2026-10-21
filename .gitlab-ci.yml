@@ -1,0 +1,15 @@
+include:
+  - template: Security/SAST.gitlab-ci.yml
+
+image: mcr.microsoft.com/dotnet/sdk:10.0
+
+stages:
+  - config
+  - test
+
+Test:
+  stage: test
+  script:
+    - dotnet restore
+    - dotnet test
+  allow_failure: false

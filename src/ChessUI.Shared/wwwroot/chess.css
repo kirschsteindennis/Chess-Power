@@ -1,0 +1,187 @@
+html, body {
+    margin: 0;
+    height: 100%;
+    background: #101010;
+    color: #ffa274;
+    font-family: 'Segoe UI Light', 'Segoe UI', Arial, sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+/* ---------- Brett ---------- */
+.chess-wrapper {
+    position: relative;
+    width: min(86vmin, 720px);
+}
+
+.chess-board {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    grid-template-rows: repeat(8, minmax(0, 1fr));
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    border: 4px solid #260000;
+    border-radius: 6px;
+    overflow: hidden;
+    user-select: none;
+    box-sizing: border-box;
+}
+
+.square {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+    .square.light {
+        background: #f0d9b5;
+    }
+
+    .square.dark {
+        background: #b58863;
+    }
+
+    .square.selected {
+        background: #f6f669;
+    }
+
+.piece {
+    position: absolute;
+    inset: 3%;
+    pointer-events: none; /* Klick geht ans Feld */
+}
+
+    .piece svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+.hint {
+    position: absolute;
+    width: 32%;
+    height: 32%;
+    border-radius: 50%;
+    background: rgba(60, 200, 60, 0.6);
+    pointer-events: none;
+}
+
+.status {
+    margin-top: 10px;
+    height: 28px;
+    font-size: 18px;
+}
+
+/* ---------- Menüs und Dialoge ---------- */
+.overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.menu-card {
+    min-width: 260px;
+    padding: 24px 32px;
+    text-align: center;
+    background: rgba(56, 4, 4, 0.92);
+    border: 4px solid #260000;
+    border-radius: 10px;
+}
+
+.menu-title {
+    margin: 0 0 24px 0;
+    font-weight: 300;
+    font-size: 32px;
+}
+
+.menu-reason {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+}
+
+.menu-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.menu-button {
+    display: block;
+    width: 250px;
+    height: 50px;
+    margin: 10px auto;
+    font-family: inherit;
+    font-size: 16px;
+    color: #ffa274;
+    background: #730909;
+    border: 2px solid #260000;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+    .menu-button:hover:not(:disabled) {
+        filter: brightness(1.25);
+    }
+
+    .menu-button:disabled {
+        opacity: 0.45;
+        cursor: default;
+    }
+
+.menu-row .menu-button {
+    width: 110px;
+    height: 36px;
+    margin: 0;
+}
+
+.promotion-row {
+    display: flex;
+    gap: 8px;
+}
+
+.promotion-piece {
+    width: 64px;
+    height: 80px;
+    padding: 4px;
+    background: transparent;
+    border: 2px solid #260000;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+    .promotion-piece:hover {
+        background: #730909;
+    }
+
+    .promotion-piece svg {
+        width: 100%;
+        height: 100%;
+    }
+
+.action-row {
+    margin-top: 8px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+    .action-row .menu-button {
+        width: 140px;
+        height: 36px;
+        margin: 0;
+    }

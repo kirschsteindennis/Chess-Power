@@ -1,0 +1,12 @@
+﻿<div class="menu-card">
+    @if (!string.IsNullOrEmpty(Title))
+    {
+        <h2 class="menu-title">@Title</h2>
+    }
+    @ChildContent
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+}

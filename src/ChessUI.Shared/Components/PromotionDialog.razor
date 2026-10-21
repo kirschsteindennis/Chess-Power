@@ -1,0 +1,18 @@
+﻿<div class="overlay">
+    <MenuPanel Title="SELECT A PIECE">
+        @foreach (PieceType type in options)
+        {
+            <button class="promotion-piece" @onclick="() => PieceSelected.InvokeAsync(type)">
+                @((MarkupString)PieceSvg.Get(Color, type))
+            </button>
+        }
+    </MenuPanel>
+</div>
+
+@code {
+    [Parameter] public Player Color { get; set; }
+    [Parameter] public EventCallback<PieceType> PieceSelected { get; set; }
+
+    private static readonly PieceType[] options =
+        [PieceType.Queen, PieceType.Rook, PieceType.Bishop, PieceType.Knight];
+}

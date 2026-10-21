@@ -1,0 +1,138 @@
+﻿@implements IDisposable
+
+<div class="chess-wrapper">
+    <div class="chess-board">
+        @foreach (int r in Indices)
+        {
+            foreach (int c in Indices)
+            {
+                Position pos = new(r, c);
+                Piece piece = Session.Board[pos];
+
+                <div class="@SquareClass(pos)" @onclick="() => OnSquareClick(pos)">
+                    @if (piece != null)
+                    {
+                        <div class="piece">@((MarkupString)PieceSvg.Get(piece.Color, piece.Type))</div>
+                    }
+                    @if (targets.ContainsKey(pos))
+                    {
+                        <div class="hint"></div>
+                    }
+                </div>
+            }
+        }
+    </div>
+
+    @if (promotionPending)
+    {
+        <PromotionDialog Color="Session.CurrentPlayer" PieceSelected="OnPromotionChosen" />
+    }
+
+    @if (Session.IsGameOver)
+    {
+        <GameOverDialog Result="Session.Result"
+                        CurrentPlayer="Session.CurrentPlayer"
+                        Actions="GameOverActions"/>
+    }
+</div>
+
+<div class="status">@StatusText</div>
+
+@code {
+    [Parameter, EditorRequired] public IGameSession Session { get; set; }
+    [Parameter] public RenderFragment GameOverActions { get; set; }
+
+    private Position selected;
+    private Position promotionTo;
+    private bool promotionPending;
+    private Dictionary<Position, List<Move>> targets = [];
+
+    /// <summary>Turns the Board 180° if player is black</summary>
+    private IEnumerable<int> Indices => Session.LocalPlayer == Player.Black
+            ? Enumerable.Range(0, 8).Reverse()
+            : Enumerable.Range(0, 8);
+
+    private string StatusText
+    {
+        get
+        {
+            if (Session.IsGameOver) return "Game Over";
+
+            string you = Session.LocalPlayer == Player.White ? "White" : "Black";
+            return Session.IsLocalTurn
+                ? $"You play {you} - your turn"
+                : $"You play {you} - waiting for opponent";
+        }
+    }
+
+    protected override void OnInitialized() => Session.Changed += OnSessionChanged;
+
+    public void Dispose() => Session.Changed -= OnSessionChanged;
+
+    private void OnSessionChanged()
+    {
+        _ = InvokeAsync(() =>
+        {
+            ClearSelection();
+            StateHasChanged();
+        });
+    }
+
+    private string SquareClass(Position pos)
+    {
+        string color = (pos.Row + pos.Column) % 2 == 0 ? "light" : "dark";
+        return pos == selected ? $"square {color} selected" : $"square {color}";
+    }
+
+    private async Task OnSquareClick(Position pos)
+    {
+        if (!Session.IsLocalTurn || Session.IsGameOver || promotionPending)
+            return;
+
+        // Target Field of a selected figure clicked -> execute move
+        if (selected != null && targets.TryGetValue(pos, out List<Move> moves))
+        {
+            if (moves.Any(m => m.Type == MoveType.PawnPromotion))
+            {
+                promotionTo = pos;
+                promotionPending = true;
+                return;
+            }
+
+            ClearSelection();
+            await Session.TryMakeMoveAsync(moves[0]);
+            return;
+        }
+
+        SelectPiece(pos);
+    }
+
+    private void SelectPiece(Position pos)
+    {
+        List<Move> moves = Session.LegalMovesFor(pos).ToList();
+
+        if (moves.Count == 0)
+        {
+            ClearSelection();
+            return;
+        }
+
+        selected = pos;
+        // Multiple turns have the same destination -> group for destination-field
+        targets = moves.GroupBy(m => m.ToPos).ToDictionary(g => g.Key, g => g.ToList());
+    }
+
+    private async Task OnPromotionChosen(PieceType type)
+    {
+        Move move = new PawnPromotion(selected, promotionTo, type);
+        promotionPending = false;
+        ClearSelection();
+        await Session.TryMakeMoveAsync(move);
+    }
+
+    private void ClearSelection()
+    {
+        selected = null;
+        targets = [];
+    }
+}

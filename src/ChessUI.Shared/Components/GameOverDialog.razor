@@ -1,0 +1,39 @@
+﻿<div class="overlay">
+    <MenuPanel Title="@GetWinnerText(Result.Winner)">
+        <p class="menu-reason">@GetReasonText(Result, CurrentPlayer)</p>
+        <div class="menu-row">
+            @Actions
+        </div>
+    </MenuPanel>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public Result Result { get; set; }
+    [Parameter, EditorRequired] public Player CurrentPlayer { get; set; }
+    [Parameter] public RenderFragment Actions { get; set; }
+
+    private static string GetWinnerText(Player winner) => winner switch
+    {
+        Player.White => "WHITE WINS!",
+        Player.Black => "BLACK WINS!",
+        _ => "IT's A DRAW!"
+    };
+
+    private static string PlayerString(Player player) => player switch
+    {
+        Player.White => "WHITE",
+        Player.Black => "BLACK",
+        _ => ""
+    };
+
+    private static string GetReasonText(Result result, Player currentPlayer) => result.Reason switch
+    {
+        EndReason.Stalemate => $"STALEMATE - {PlayerString(currentPlayer)} CAN'T MOVE",
+        EndReason.Checkmate => $"CHECKMATE - {PlayerString(currentPlayer)} CAN'T MOVE",
+        EndReason.Resignation => $"{PlayerString(result.Winner.Opponent())} RESIGNED",
+        EndReason.FiftyMoveRule => "FIFTY-MOVE RULE",
+        EndReason.InsufficientMaterial => "INSUFFICIENT MATERIAL",
+        EndReason.ThreefoldRepetition => "THREEFOLD REPETITION",
+        _ => ""
+    };
+}

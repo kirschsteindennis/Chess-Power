@@ -1,0 +1,38 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.22/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.22",
+  "version": "1.0.0",
+  "id": "23b99095-4394-4962-8e05-dca1fe5b6229",
+  "developer": {
+    "name": "Dein Firmenname",
+    "websiteUrl": "https://DEINE-DOMAIN",
+    "privacyUrl": "https://DEINE-DOMAIN/privacy",
+    "termsOfUseUrl": "https://DEINE-DOMAIN/terms"
+  },
+  "name": {
+    "short": "Chess Power",
+    "full": "Chess Power - chess in your chat"
+  },
+  "description": {
+    "short": "Play chess against a colleague.",
+    "full": "Open Chess Power in a chat and play a match against the other person. Colors are assigned randomly."
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "accentColor": "#730909",
+  "configurableTabs": [
+    {
+      "configurationUrl": "https://DEINE-DOMAIN/config",
+      "canUpdateConfiguration": false,
+      "scopes": [ "groupChat" ]
+    }
+  ],
+  "validDomains": [ "DEINE-DOMAIN" ],
+  "permissions": [ "identity" ],
+  "webApplicationInfo": {
+    "id": "DEINE-CLIENT-ID",
+    "resource": "api://DEINE-DOMAIN/DEINE-CLIENT-ID"
+  }
+}
