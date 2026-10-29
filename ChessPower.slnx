@@ -2,6 +2,13 @@
   <Folder Name="/.config/">
     <File Path=".config/dotnet-tools.json" />
   </Folder>
+  <Folder Name="/.github/">
+    <File Path=".github/dependabot.yml" />
+  </Folder>
+  <Folder Name="/.github/workflows/">
+    <File Path=".github/workflows/ci.yml" />
+    <File Path=".github/workflows/codeql.yml" />
+  </Folder>
   <Folder Name="/Projektmappenelemente/">
     <File Path=".gitattributes" />
     <File Path=".gitignore" />
