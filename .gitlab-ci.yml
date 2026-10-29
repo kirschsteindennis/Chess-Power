@@ -1,24 +1,116 @@
 include:
-  - template: Security/SAST.gitlab-ci.yml
+  # Static analysis of the source code (Semgrep)
+  - template: Jobs/SAST.gitlab-ci.yml
+  # Finds passwords, kes and tokens that were committed by mistake
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
 
-image: mcr.microsoft.com/dotnet/sdk:10.0
+# One pipeline per push. Without these rules, a branch with an open merge request would start two pipelines
+# (one for the branch and one for the merge request)
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
 
 stages:
-  - config
-  - test
   - build
+  - test
 
-Test:
-  stage: test
-  script:
-    - dotnet restore
-    - dotnet test
-  allow_failure: false
-  only: branches
+variables:
+  DOTNET_NOLOGO: "true"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+  # The NuGet packages are stored inside the project folder so that GitLab can cache them
+  NUGET_PACKAGES: "$CI_PROJECT_DIR/.nuget/packages"
+  # "false": warnings are shown, but do not stop the build
+  # "true": set true if warnings are gone
+  WARNINGS_AS_ERRORS: "false"
+  # The SAST scan does not need to check tests and build output
+  SAST_EXCLUDED_PATHS: "tests, **/bin, **/obj, .nuget"
 
-Build:
+# Shared settings of all .NET jobs
+.dotnet:
+  image: mcr.microsoft.com/dotnet/sdk:10.0
+  interruptible: true
+  cache:
+    key:
+      files:
+        - Directory.Packages.props
+    paths:
+      - .nuget/packages
+  before_script:
+    - dotnet --info
+    # Installs the tools of .config/dotnet-tools.json
+    - dotnet tool restore
+
+
+build:
+  extends: .dotnet
   stage: build
   script:
-    - dotnet restore
-    - dotnet build
-  only: branches
+    # EnableWindowsTargeting lets the Linux runner compile the WPF project
+    - dotnet restore ChessPower.slnx -p:EnableWindowsTargeting=true
+    - >
+      dotnet build ChessPower.slnx
+      --configuration Release
+      --no-restore
+      -p:EnableWindowsTargeting=true
+      -p:ContinuousIntegrationBuild=true
+      -p:TreatWarningAsErrors=$WARNINGS_AS_ERRORS
+
+
+unit-tests:
+  extends: .dotnet
+  stage: test
+  script:
+    # Every project below tests/ is run
+    # The loop continues after a failure, so that all test projects report their results
+    - |
+      status=0
+      for project in tests/*/*.csproj; do
+        echo "=== $project ==="
+        dotnet test "$project" \
+          --configuration Release \
+          -p:ContinuousIntegrationBuild=true \
+          --logger "trx;LogFileName=$(basename "$project" .csproj).trx" \
+          --results-directory TestResults \
+          --collect:"XPlat Code Coverage" || status=1
+      done
+      exit $status
+  after_script:
+    # Runs even if tests failed: GitLab shows the results in the merge request
+    - dotnet tool restore
+    - dotnet trx2junit TestResults/*.trx
+    - dotnet reportgenerator -reports:"TestResults/**/coverage.cobertura.xml" -targetdir:CoverageReport -reporttypes:"Cobertura;TextSummary"
+    - cat CoverageReport/Summary.txt
+  coverage: '/Line coverage:\s*(\d+(?:\.\d+)?)%/'
+  artifacts:
+    when: always
+    expire_in: 14 days
+    paths:
+      - TestResults/
+      - CoverageReport/
+    reports:
+      junit: TestResults/*.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: CoverageReport/Cobertura.xml
+
+# Looks for known vulnerabilities in the NuGet packages (also in indirect ones)
+# It only warns for now, because a new vulnerability can appear at any time and should not block unrelated work
+dependency-audit:
+  extends: .dotnet
+  stage: test
+  allow_failure: true
+  script:
+    - dotnet resore ChessPower.slnx -p:EnableWindowsTargeting=true
+    - |
+      for project in src/*/*.csproj tests/*/*.csproj; do
+        dotnet list "$project" pacakge --vulnerable --include-transitive
+      done | tee audit.txt
+    - |
+      if grep -q "has the following vilnerable packages" audit.txt; then
+        echo "Vulnerable packages found, see above"
+        exit 1
+      fi
+
