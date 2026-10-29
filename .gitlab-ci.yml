@@ -106,7 +106,7 @@ dependency-audit:
     - dotnet restore ChessPower.slnx -p:EnableWindowsTargeting=true
     - |
       for project in src/*/*.csproj tests/*/*.csproj; do
-        dotnet list "$project" pacakge --vulnerable --include-transitive
+        dotnet list "$project" package --vulnerable --include-transitive
       done | tee audit.txt
     - |
       if grep -q "has the following vilnerable packages" audit.txt; then
