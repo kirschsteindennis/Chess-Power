@@ -1,0 +1,15 @@
+version: 2
+updates:
+  # Keeps the actions of the workflows up to date
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+
+  # Keeps the NuGet packages up to date (the versions live in Directory.Packages.props)
+  - pacakge-ecosystem: nuget
+    directories:
+      - "/src/*"
+      - "/tests/*"
+    schedule:
+      interval: weekly
