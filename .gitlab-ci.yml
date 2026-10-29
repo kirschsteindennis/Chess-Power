@@ -103,7 +103,7 @@ dependency-audit:
   stage: test
   allow_failure: true
   script:
-    - dotnet resore ChessPower.slnx -p:EnableWindowsTargeting=true
+    - dotnet restore ChessPower.slnx -p:EnableWindowsTargeting=true
     - |
       for project in src/*/*.csproj tests/*/*.csproj; do
         dotnet list "$project" pacakge --vulnerable --include-transitive
