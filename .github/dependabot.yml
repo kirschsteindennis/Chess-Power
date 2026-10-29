@@ -7,7 +7,7 @@ updates:
       interval: weekly
 
   # Keeps the NuGet packages up to date (the versions live in Directory.Packages.props)
-  - pacakge-ecosystem: nuget
+  - package-ecosystem: nuget
     directories:
       - "/src/*"
       - "/tests/*"
