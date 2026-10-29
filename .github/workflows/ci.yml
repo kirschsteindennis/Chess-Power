@@ -3,8 +3,8 @@ name: CI
 on:
   push:
     branches: ["**"]
-  pull_requests:
-    branches: [master]
+  pull_request:
+    branches: [master, develop]
   workflow_dispatch:
 
 # A newer push to the same branch cancels the run that is still going
@@ -102,32 +102,32 @@ jobs:
           retention-days: 14
 
 
-dependency-audit:
-  name: Dependency Audit
-  runs-on: ubuntu-latest
-  # It only warns for now, because a new vulnerability can appear at any time
-  continue-on-error: true
-  steps:
-    - uses: actions/checkout@v6
+  dependency-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    # It only warns for now, because a new vulnerability can appear at any time
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
 
-    - uses: actions/setup-dotnet@v6
-      with:
-        dotnet-version: 10.0.x
-        cache: true
-        cache-dependency-path: |
-          **/*.csproj
-          Directory.Packages.props
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            Directory.Packages.props
 
-    - name: Restore
-      run: dotnet restore ChessPower.slnx -p:EnableWindowsTargeting=true
+      - name: Restore
+        run: dotnet restore ChessPower.slnx -p:EnableWindowsTargeting=true
 
-    - name: Look for vulnerable packages
-      shell: bash
-      run: |
-        for project in src/*/*.csproj tests/*/*.csproj; do
-          dotnet list "$project" package --vulnerable --include-transitive
-        done | tee audit.txt
-        if grep -q "has the following vulnerable packages" audit.txt; then
-          echo "::warning::Vulnerable packages found, see the log"
-          exit 1
-        fi
+      - name: Look for vulnerable packages
+        shell: bash
+        run: |
+          for project in src/*/*.csproj tests/*/*.csproj; do
+            dotnet list "$project" package --vulnerable --include-transitive
+          done | tee audit.txt
+          if grep -q "has the following vulnerable packages" audit.txt; then
+            echo "::warning::Vulnerable packages found, see the log"
+            exit 1
+          fi
