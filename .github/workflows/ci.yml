@@ -63,17 +63,17 @@ jobs:
             Directory.Packages.props
 
       # Installs the tools of .config/dotnet-tools.json
-      - name: Restore Tools
+      - name: Restore tools
         run: dotnet tool restore
 
       # Every project below tests/ is run
-      # The loop continues after a failure, so that all test project report their results
-      - name: Run Tests
+      # The loop continues after a failure, so that all test projects report their results.
+      - name: Run tests
         shell: bash
         run: |
           status=0
           for project in tests/*/*.csproj; do
-            echo"::group::$project"
+            echo "::group::$project"
             dotnet test "$project" \
               --configuration Release \
               -p:ContinuousIntegrationBuild=true \
