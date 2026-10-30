@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "trx2junit": {
+      "version": "2.1.0",
+      "commands": [
+        "trx2junit"
+      ],
+      "rollForward": false
+    },
+    "dotnet-reportgenerator-globaltool": {
+      "version": "5.5.12",
+      "commands": [
+        "reportgenerator"
+      ],
+      "rollForward": false
+    }
+  }
+}
