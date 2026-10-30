@@ -20,6 +20,7 @@
   <Folder Name="/src/">
     <Project Path="src/ChessLogic/ChessLogic.csproj" />
     <Project Path="src/ChessOnline/ChessOnline.csproj" Id="4b965f9e-7b02-46ab-841b-88a7fde429ff" />
+    <Project Path="src/ChessPower.Logging/ChessPower.Logging.csproj" />
     <Project Path="src/ChessUI.Shared/ChessUI.Shared.csproj" Id="56bdaa4d-e269-4fdc-af46-c41d74a05e5a" />
     <Project Path="src/ChessUI.Teams/ChessUI.Teams.csproj" />
     <Project Path="src/ChessUI.Wpf/ChessUI.Wpf.csproj" Id="0b384925-a192-4b2a-8c3f-4e92a2eb25e6" />
