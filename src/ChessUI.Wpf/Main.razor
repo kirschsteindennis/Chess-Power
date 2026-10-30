@@ -1,3 +1,5 @@
+@using Microsoft.Extensions.Logging
+
 @if (session is null) {
     <MenuPanel Title="Chess Power">
         <MenuButton Text="Easy" OnClick="() => Start(AIDifficulty.Easy)"/>
@@ -16,9 +18,11 @@ else {
 }
 
 @code {
+    @inject ILogger<AiGameSession> SessionLogger
+
     private IGameSession session;
 
-    private void Start(AIDifficulty difficulty) => session = new AiGameSession(difficulty);
+    private void Start(AIDifficulty difficulty) => session = new AiGameSession(difficulty, SessionLogger);
 
     private void BackToMenu() => session = null;
 
