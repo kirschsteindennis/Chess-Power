@@ -35,6 +35,7 @@
     <Project Path="tests/Chess.Test.Shared/Chess.Test.Shared.csproj" Id="04c130ea-c3ad-4075-b369-e7b8fdcfc533" />
     <Project Path="tests/ChessLogic.Tests/ChessLogic.Tests.csproj" Id="3d4cfaa7-f27a-4244-929d-f23cd408f9f4" />
     <Project Path="tests/ChessOnline.Tests/ChessOnline.Tests.csproj" Id="be619e13-856a-454e-941d-8cca2fef5d41" />
+    <Project Path="tests/ChessPower.Logging.Tests/ChessPower.Logging.Tests.csproj" />
     <Project Path="tests/ChessUI.Shared.Tests/ChessUI.Shared.Tests.csproj" />
     <Project Path="tests/ChessUI.Teams.Tests/ChessUI.Teams.Tests.csproj" Id="9557036b-3365-4dcd-9770-014415d9cacb" />
   </Folder>
