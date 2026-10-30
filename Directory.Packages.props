@@ -23,6 +23,8 @@
     <PackageVersion Include="NUnit3TestAdapter" Version="6.3.0" />
     <PackageVersion Include="Serilog" Version="4.4.0" />
 	<PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
+	<PackageVersion Include="Serilog.Extensions.Logging" Version="10.0.0" />
+	<PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageVersion Include="SharpVectors" Version="1.8.6" />
     <PackageVersion Include="bunit" Version="2.11.3" />
   </ItemGroup>

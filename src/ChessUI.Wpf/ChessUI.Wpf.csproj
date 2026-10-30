@@ -11,6 +11,8 @@
 
   <ItemGroup>
 	  <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Wpf" />
+	  <PackageReference Include="Serilog.Extensions.Logging" />
+	  <PackageReference Include="Serilog.Sinks.File" />
   </ItemGroup>
 
   <ItemGroup>
