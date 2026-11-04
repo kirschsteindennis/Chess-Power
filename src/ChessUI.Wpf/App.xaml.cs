@@ -2,6 +2,7 @@
 using ChessPower.Logging.Tracing;
 using ChessUI.Wpf.Logging;
 using Serilog;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -24,7 +25,10 @@ public partial class App : Application
         AppDomain.CurrentDomain.UnhandledException += OnDomainUnhandledException;
         TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
 
-        Log.Information("Chess Power started");
+        // The folder is written with the variable, not with its value: the real path contains the Windows user name
+        Log.Information(
+            "Chess Power {Version} started ({Runtime} on {Os}). Log files: %LocalAppData%\\ChessPower\\logs",
+            DesktopLogging.Version, RuntimeInformation.FrameworkDescription, RuntimeInformation.OSDescription);
 
         base.OnStartup(e);
     }

@@ -12,9 +12,14 @@ public static class DesktopLogging
     public static string LogDirectory => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ChessPower", "logs");
 
-    public static Serilog.ILogger Create()
+    public static string Version { get; } =
+        Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+            ?? Assembly.GetExecutingAssembly().GetName().Version?.ToString()
+            ?? "unknown";
+
+    public static ILogger Create()
     {
-        string version = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
+        string version = Version;
 
 #if DEBUG
         const LogEventLevel level = LogEventLevel.Debug;
