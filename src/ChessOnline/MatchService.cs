@@ -9,17 +9,27 @@ namespace ChessOnline;
 /// <summary>
 /// Registerd as a singleton: one instance for all users, so everybody sees the same matches
 /// </summary>
-/// <param name="random">A Random Source</param>
-/// <param name="loggerFactory">Used to Create a logger</param>
-/// <param name="pseudonymizer">Makes id's of chats and people safe for the log. Without it, nothing about them is logged.</param>
-public sealed class MatchService(IRandomSource random, IPseudonymizer pseudonymizer = null, ILoggerFactory loggerFactory = null)
+public sealed class MatchService
 {
     private readonly object gate = new();
     private readonly Dictionary<string, ChessMatch> matches = [];
-    private readonly IRandomSource random = random;
-    private readonly IPseudonymizer pseudonymizer = pseudonymizer ?? HiddenPseudonymizer.Instance;
-    private readonly ILoggerFactory loggerFactory = loggerFactory ?? NullLoggerFactory.Instance;
-    private readonly ILogger logger = loggerFactory.CreateLogger<MatchService>();
+    private readonly IRandomSource random;
+    private readonly IPseudonymizer pseudonymizer;
+    private readonly ILoggerFactory loggerFactory;
+    private readonly ILogger logger;
+
+    /// <param name="random">A Random Source</param>
+    /// <param name="loggerFactory">Used to Create a logger</param>
+    /// <param name="pseudonymizer">Makes id's of chats and people safe for the log. Without it, nothing about them is logged.</param>
+    public MatchService(IRandomSource random, IPseudonymizer pseudonymizer = null, ILoggerFactory loggerFactory = null)
+    {
+        ILoggerFactory factory = loggerFactory ?? NullLoggerFactory.Instance;
+        
+        this.random = random;
+        this.pseudonymizer = pseudonymizer ?? HiddenPseudonymizer.Instance;
+        this.loggerFactory = factory;
+        logger = factory.CreateLogger<MatchService>();
+    }
 
     /// <returns>The match of this chat, or null if two other people already play in it</returns>
     public ChessMatch FindOrCreate(string chatId, string userId)
