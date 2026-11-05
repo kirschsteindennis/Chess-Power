@@ -149,7 +149,70 @@ public class StartupChecksTests
 
     #region Pseudonym Key
 
+    [TestCase(null)]
+    [TestCase("")]
+    [TestCase("too-short")]
+    public void Run_WithoutAGoodPseudonymKey_IsAWarning(string key)
+    {
+        // Arrange: not an error, because the program then uses a random key and stays safe
+        Dictionary<string, string> settings = GoodSettings();
+        settings["Privacy:PseudonymKey"] = key;
 
+        // Act
+        IReadOnlyList<StartupCheck> checks = Run(settings);
+
+        // Assert
+        Assert.That(Check(checks, "Privacy:PseudonymKey").Status, Is.EqualTo(StartupCheckStatus.Warning));
+    }
+
+    #endregion
+
+    #region Environment
+
+    [Test]
+    public void Run_DevelopmentWithAPublicDomain_IsAWarning()
+    {
+        // Arrange: in Development anybody can pretend to be any user, so this must never run on a public server
+        Dictionary<string, string> settings = GoodSettings();
+
+        // Act
+        IReadOnlyList<StartupCheck> checks = Run(settings, "Development");
+
+        // Assert
+        Assert.That(Check(checks, "Environment").Status, Is.EqualTo(StartupCheckStatus.Warning));
+    }
+
+    [Test]
+    public void Run_Production_ShowsTheEnvironmentName()
+    {
+        // Arrange
+        Dictionary<string, string> settings = GoodSettings();
+
+        // Act
+        IReadOnlyList<StartupCheck> checks = Run(settings, "Production");
+
+        // Assert
+        Assert.That(Check(checks, "Environment").Detail, Is.EqualTo("Production"));
+    }
+
+    #endregion
+
+    #region Secrets
+
+    [Test]
+    public void Run_NeverRepeatsTheValuesOfTheSettings()
+    {
+        // Arrange: a check may say that a secret is missing or set, but never what it is
+        Dictionary<string, string> settings = GoodSettings();
+
+        // Act
+        IReadOnlyList<StartupCheck> checks = Run(settings);
+
+        // Assert
+        string everything = string.Join("\n", checks.Select(c => c.Detail));
+        Assert.That(everything, Does.Not.Contain(GoodKey));
+        Assert.That(everything, Does.Not.Contain(GoodClientId));
+    }
 
     #endregion
 }
