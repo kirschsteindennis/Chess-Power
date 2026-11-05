@@ -85,6 +85,70 @@ public class StartupChecksTests
 
     #region Teams:Domain
 
+    [Test]
+    public void Run_WithoutADomain_IsAnError()
+    {
+        // Arrange
+        Dictionary<string, string> settings = GoodSettings();
+        settings.Remove("Teams:Domain");
+
+        // Act
+        IReadOnlyList<StartupCheck> checks = Run(settings);
+
+        // Assert
+        Assert.That(Check(checks, "Teams:Domain").Status, Is.EqualTo(StartupCheckStatus.Error));
+    }
+
+    [TestCase("https://chess.example.com")]
+    [TestCase("chess.example.com/app")]
+    [TestCase("chess example")]
+    public void Run_ADomainThatIsNotJustAHostName_IsAnError(string domain)
+    {
+        // Arrange: the domain is used to build "api://{domain}/{clientId}", so a scheme or a path breaks it
+        Dictionary<string, string> settings = GoodSettings();
+        settings["Teams:Domain"] = domain;
+
+        // Act
+        IReadOnlyList<StartupCheck> checks = Run(settings);
+
+        // Assert
+        Assert.That(Check(checks, "Teams:Domain").Status, Is.EqualTo(StartupCheckStatus.Error));
+    }
+
+    [TestCase("localhost")]
+    [TestCase("127.0.0.1")]
+    [TestCase("abc123-7193.euw.devtunnels.ms")]
+    public void Run_ATestAddressInProduction_IsAWarning(string domain)
+    {
+        // Arrange
+        Dictionary<string, string> settings = GoodSettings();
+        settings["Teams:Domain"] = domain;
+
+        // Act
+        IReadOnlyList<StartupCheck> checks = Run(settings, "Production");
+
+        // Assert
+        Assert.That(Check(checks, "Teams:Domain").Status, Is.EqualTo(StartupCheckStatus.Warning));
+    }
+
+    [Test]
+    public void Run_ATestAddressInDevelopment_IsFine()
+    {
+        // Arrange
+        Dictionary<string, string> settings = GoodSettings();
+        settings["Teams:Domain"] = "abc123-7193.euw.devtunnels.ms";
+
+        // Act
+        IReadOnlyList<StartupCheck> checks = Run(settings, "Development");
+
+        // Assert
+        Assert.That(checks.All(c => c.Status == StartupCheckStatus.Ok), Is.True);
+    }
+
+    #endregion
+
+    #region Pseudonym Key
+
 
 
     #endregion
