@@ -88,13 +88,78 @@ public class StartupReportTests
         bool hasErrors = StartupReport.Write(logger, checks, new FakeHostEnvironment("Production"));
 
         // Assert
-        List<LogEvent> checkLines = [.. sink.Events.Where(e => e.MessageTemplate.Text.StartsWith("Startup check"))];
+        List<LogEvent> checkLines = sink.Events.Where(e => e.MessageTemplate.Text.StartsWith("Startup check ")).ToList();
         using (Assert.EnterMultipleScope())
         {
             Assert.That(hasErrors, Is.False);
-            Assert.That(checkLines, Has.Count.EqualTo(5));
+            Assert.That(checkLines.Count, Is.EqualTo(4));
+            Assert.That(checkLines.All(e => e.Level == LogEventLevel.Debug), Is.True);
         }
-        Assert.That(checkLines.All(e => e.Level == LogEventLevel.Debug), Is.True);
+    }
+
+    [Test]
+    public void Write_AMissingClientId_IsLoggedAsAnErrorAndReported()
+    {
+        // Arrange
+        var checks = Checks(null, "chess.example.com", Key);
+
+        // Act
+        bool hasErrors = StartupReport.Write(logger, checks, new FakeHostEnvironment("Production"));
+
+        // Assert
+        LogEvent error = sink.Events.Single(e => e.Level == LogEventLevel.Error);
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(hasErrors, Is.True);
+            Assert.That(Property(error, "Check"), Is.EqualTo("Teams:ClientId"));
+        }
+    }
+
+    [Test]
+    public void Write_AMissingKey_IsLoggedAsAWarningButIsNoError()
+    {
+        // Arrange
+        var checks = Checks("11111111-1111-1111-1111-111111111111", "chess.example.com", null);
+
+        // Act
+        bool hasErrors = StartupReport.Write(logger, checks, new FakeHostEnvironment("Production"));
+
+        // Assert
+        LogEvent warning = sink.Events.Single(e => e.Level == LogEventLevel.Warning);
+        Assert.That(hasErrors, Is.False);
+        Assert.That(Property(warning, "Check"), Is.EqualTo("Privacy:PseudonymKey"));
+    }
+
+    [Test]
+    public void Write_EndsWithTheCountsOfTheChecks()
+    {
+        // Arrange: one error (client id), one warning (key), two fine
+        var checks = Checks("", "chess.example.com", "short");
+
+        // Act
+        StartupReport.Write(logger, checks, new FakeHostEnvironment("Production"));
+
+        // Assert
+        LogEvent summary = sink.Events.Last();
+        Assert.That(summary.MessageTemplate.Text, Does.StartWith("Startup checks finished"));
+        Assert.That(Property(summary, "Ok"), Is.EqualTo("2"));
+        Assert.That(Property(summary, "Warnings"), Is.EqualTo("1"));
+        Assert.That(Property(summary, "Errors"), Is.EqualTo("1"));
+    }
+
+    [Test]
+    public void Write_NeverWritesTheValueOfASecretToTheLog()
+    {
+        // Arrange
+        var checks = Checks("11111111-1111-1111-1111-111111111111", "chess.example.com", Key);
+
+        // Act
+        StartupReport.Write(logger, checks, new FakeHostEnvironment("Production"));
+
+        // Assert
+        string everything = string.Join("\n", sink.Events.Select(e => e.RenderMessage()));
+        Assert.That(everything, Does.Not.Contain(Key));
+        Assert.That(everything, Does.Not.Contain("11111111-1111-1111-1111-111111111111"));
     }
 
     #endregion
