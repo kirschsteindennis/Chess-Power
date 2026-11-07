@@ -1,10 +1,19 @@
-﻿<!DOCTYPE html>
+﻿@using System.Diagnostics
+
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
+    @* The trace of this request: the browser sends it back with its error reports *@
+    @if (TraceParent is not null)
+    {
+        <meta name="traceparent" content="@TraceParent" />
+    }
+    @* First script: it also sees errors of the scripts that come after it *@
+    <script src="@Assets["client-errors.js"]"></script>
     <ResourcePreloader />
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <link rel="stylesheet" href="@Assets["ChessUI.Teams.styles.css"]" />
@@ -22,3 +31,8 @@
 </body>
 
 </html>
+
+@code {
+    private static string TraceParent =>
+            Activity.Current is { IdFormat: ActivityIdFormat.W3C } activity ? activity.Id : null;
+}

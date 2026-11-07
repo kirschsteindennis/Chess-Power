@@ -1,9 +1,19 @@
-﻿window.chessTeams = {
+﻿window.chessTeams = window.chessTeams || {};
+
+// client-errors.js is loaded before this file. Without it, errors are only shown in the console.
+function reportToServer(kind, error) {
+    if (typeof window.chessTeams.reportError === "function") {
+        window.chessTeams.reportError(kind, error);
+    }
+}
+
+Object.assign(window.chessTeams, {
+
     // Returns { chatId }, or null if the app does not run inside Teams
     getContext: async function () {
         const inTeamsFrame = window.parent !== window || !!window.nativeInterface;
 
-        if (!inTeamsFrame || typeof microsoftTEams === "undefined") {
+        if (!inTeamsFrame || typeof microsoftTeams === "undefined") {
             return null;
         }
 
@@ -14,11 +24,10 @@
 
             const context = await microsoftTeams.app.getContext();
 
-            return {
-                chatId: context.chat ? context.chat.id : null
-            };
+            return { chatId: context.chat ? context.chat.id : null };
         } catch (error) {
-            console.warn("Teams initialization failed", error);
+            console.warn("Teams initialisation failed", error);
+            reportToServer("teams-sdk", error);
             return null;
         }
     },
@@ -29,6 +38,7 @@
             return await microsoftTeams.authentication.getAuthToken();
         } catch (error) {
             console.warn("getAuthToken failed", error);
+            reportToServer("teams-auth", error);
             return null;
         }
     },
@@ -47,7 +57,8 @@
                 websiteUrl: origin + "/"
             }).then(function () {
                 saveEvent.notifySuccess();
-            }).catch(function () {
+            }).catch(function (error) {
+                reportToServer("teams-sdk", error);
                 saveEvent.notifyFailure("Could not save the tab.");
             });
         });
@@ -55,4 +66,4 @@
         microsoftTeams.pages.config.setValidityState(true);
         microsoftTeams.app.notifySuccess();
     }
-}
+});
