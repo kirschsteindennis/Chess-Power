@@ -39,4 +39,7 @@
     <Project Path="tests/ChessUI.Shared.Tests/ChessUI.Shared.Tests.csproj" />
     <Project Path="tests/ChessUI.Teams.Tests/ChessUI.Teams.Tests.csproj" Id="9557036b-3365-4dcd-9770-014415d9cacb" />
   </Folder>
+  <Folder Name="/tests/js/">
+    <File Path="tests/js/client-scripts.test.js" />
+  </Folder>
 </Solution>
