@@ -102,6 +102,17 @@ jobs:
           retention-days: 14
 
 
+  javascript-tests:
+    name: JavaScript Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      # Node is already installed on ubuntu runners
+      - name: Run Tests
+        run: node tests/js/client-scripts.test.js
+
+
   dependency-audit:
     name: Dependency Audit
     runs-on: ubuntu-latest

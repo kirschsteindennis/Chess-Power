@@ -96,6 +96,15 @@ unit-tests:
         coverage_format: cobertura
         path: CoverageReport/Cobertura.xml
 
+
+javascript-tests:
+  stage: test
+  image: node:22
+  interruptible: true
+  script:
+    - node tests/js/client-scripts.test.js
+
+
 # Looks for known vulnerabilities in the NuGet packages (also in indirect ones)
 # It only warns for now, because a new vulnerability can appear at any time and should not block unrelated work
 dependency-audit:
