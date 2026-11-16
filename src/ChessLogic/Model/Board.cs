@@ -138,6 +138,25 @@ public class Board
             IsKingKnightVKing(counting) || IsKingBishopVKingBishop(counting);
     }
 
+    /// <summary>
+    /// Whether the player still has enough material to checkmate: a pawn, a rook or a queen,
+    /// or at least two minor pieces. A lone king or a king with only one bishop or knight, cannot.
+    /// (Simplified: Two knights count as "can checkmate", because a checkmate is possible in theory.)
+    /// </summary>
+    /// <param name="player">The current Player</param>
+    /// <returns>Whether there is enough Material or not</returns>
+    public bool HasMatingMaterial(Player player)
+    {
+        Counting counting = CountPieces();
+
+        int Count(PieceType type) => player == Player.White ? counting.White(type) : counting.Black(type);
+
+        if (Count(PieceType.Pawn) > 0 || Count(PieceType.Rook) > 0 || Count(PieceType.Queen) > 0)
+            return true;
+
+        return Count(PieceType.Bishop) + Count(PieceType.Knight) >= 2;
+    }
+
     private static bool IsKingVKing(Counting counting)
     {
         return counting.TotalCount == 2;

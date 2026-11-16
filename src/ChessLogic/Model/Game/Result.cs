@@ -21,4 +21,9 @@ public class Result(Player winner, EndReason reason)
     {
         return new Result(winner, EndReason.Resignation);
     }
+
+    public static Result Timeout(Player winner)
+    {
+        return new Result(winner, EndReason.Timeout);
+    }
 }

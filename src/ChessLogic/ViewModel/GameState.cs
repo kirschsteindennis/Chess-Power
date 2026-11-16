@@ -100,6 +100,18 @@ public class GameState
         Result = Result.Resignation(player.Opponent());
     }
 
+    public void LoseOnTime(Player player)
+    {
+        if (IsGameOver())
+            return;
+
+        Player opponent = player.Opponent();
+
+        Result = Board.HasMatingMaterial(opponent)
+            ? Result.Timeout(opponent)
+            : Result.Draw(EndReason.TimeoutInsufficientMaterial);
+    }
+
     private bool FiftyMoveRule()
     {
         int fullMoves = noCaptureOrPawnMoves / 2;
