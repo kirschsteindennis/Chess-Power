@@ -1,14 +1,26 @@
 <Solution>
+  <Folder Name="/.config/">
+    <File Path=".config/dotnet-tools.json" />
+  </Folder>
+  <Folder Name="/.github/">
+    <File Path=".github/dependabot.yml" />
+  </Folder>
+  <Folder Name="/.github/workflows/">
+    <File Path=".github/workflows/ci.yml" />
+    <File Path=".github/workflows/codeql.yml" />
+  </Folder>
   <Folder Name="/Projektmappenelemente/">
     <File Path=".gitattributes" />
     <File Path=".gitignore" />
     <File Path=".gitlab-ci.yml" />
     <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
     <File Path="README.md" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/ChessLogic/ChessLogic.csproj" />
     <Project Path="src/ChessOnline/ChessOnline.csproj" Id="4b965f9e-7b02-46ab-841b-88a7fde429ff" />
+    <Project Path="src/ChessPower.Logging/ChessPower.Logging.csproj" />
     <Project Path="src/ChessUI.Shared/ChessUI.Shared.csproj" Id="56bdaa4d-e269-4fdc-af46-c41d74a05e5a" />
     <Project Path="src/ChessUI.Teams/ChessUI.Teams.csproj" />
     <Project Path="src/ChessUI.Wpf/ChessUI.Wpf.csproj" Id="0b384925-a192-4b2a-8c3f-4e92a2eb25e6" />
@@ -23,7 +35,11 @@
     <Project Path="tests/Chess.Test.Shared/Chess.Test.Shared.csproj" Id="04c130ea-c3ad-4075-b369-e7b8fdcfc533" />
     <Project Path="tests/ChessLogic.Tests/ChessLogic.Tests.csproj" Id="3d4cfaa7-f27a-4244-929d-f23cd408f9f4" />
     <Project Path="tests/ChessOnline.Tests/ChessOnline.Tests.csproj" Id="be619e13-856a-454e-941d-8cca2fef5d41" />
+    <Project Path="tests/ChessPower.Logging.Tests/ChessPower.Logging.Tests.csproj" />
     <Project Path="tests/ChessUI.Shared.Tests/ChessUI.Shared.Tests.csproj" />
     <Project Path="tests/ChessUI.Teams.Tests/ChessUI.Teams.Tests.csproj" Id="9557036b-3365-4dcd-9770-014415d9cacb" />
+  </Folder>
+  <Folder Name="/tests/js/">
+    <File Path="tests/js/client-scripts.test.js" />
   </Folder>
 </Solution>
