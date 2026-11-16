@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" />
+	<PackageReference Include="Serilog.AspNetCore" />
   </ItemGroup>
 
   <ItemGroup>
