@@ -1,4 +1,5 @@
-﻿using ChessLogic.Enums;
+﻿using ChessLogic.Clock;
+using ChessLogic.Enums;
 using ChessLogic.Model;
 using ChessLogic.Model.Game;
 using ChessLogic.Moves;
@@ -26,6 +27,12 @@ public interface IGameSession
 
     /// <summary>False, if the enemy (AI or Human) is in turn</summary>
     bool IsLocalTurn { get; }
+
+    /// <summary>
+    /// The state of the Chess clock, or null, if it is played without clock.
+    /// A Default Implementation, so existing Sessions and Mocks are unchanged
+    /// </summary>
+    ClockSnapshot Clock => null;
 
     /// <summary>Will be fired, when something changed (own turn, enemy turn, game over, etc)</summary>
     event Action Changed;

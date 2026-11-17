@@ -114,4 +114,93 @@ public sealed class ChessClock : IDisposable
                 timer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
         }
     }
+
+    /// <summary>
+    /// True if the clock of this player is running and his time is over (the timer may not have fired yet)
+    /// </summary>
+    /// <param name="player">The Player requesting</param>
+    /// <returns>True if the Clock is running and time is over</returns>
+    public bool IsExpired(Player player)
+    {
+        lock (gate)
+            return running == player && RemainingNoLock(player) <= TimeSpan.Zero;
+    }
+
+    public TimeSpan Remaining(Player player)
+    {
+        lock (gate)
+            return RemainingNoLock(player);
+    }
+
+    public ClockSnapshot Snapshot()
+    {
+        lock (gate)
+            return new ClockSnapshot(Control, white, black, running, startedAt, time.TimestampFrequency);
+    }
+
+    public void Dispose()
+    {
+        lock (gate)
+        {
+            if (disposed)
+                return;
+
+            disposed = true;
+            timer.Dispose();
+        }
+    }
+
+    #region Private Methods
+
+    private TimeSpan RemainingNoLock(Player player)
+    {
+        TimeSpan stored = player == Player.White ? white : black;
+
+        if (player != running)
+            return stored;
+
+        TimeSpan remaining = stored - time.GetElapsedTime(startedAt);
+        return remaining < TimeSpan.Zero ? TimeSpan.Zero : remaining;
+    }
+
+    private void SetTime(Player player, TimeSpan value)
+    {
+        if (player == Player.White)
+            white = value;
+        else
+            black = value;
+    }
+
+    private void Schedule()
+    {
+        timer.Change(RemainingNoLock(running), Timeout.InfiniteTimeSpan);
+    }
+
+    private void OnTimer(object state)
+    {
+        Player flagged;
+
+        lock (gate)
+        {
+            if (disposed || running == Player.None)
+                return;
+
+            TimeSpan left = RemainingNoLock(running);
+
+            // The Timer can fire a moment too early, wait for the rest
+            if (left > TimeSpan.Zero)
+            {
+                timer.Change(left, Timeout.InfiniteTimeSpan);
+                return;
+            }
+
+            flagged = running;
+            SetTime(flagged, TimeSpan.Zero);
+            running = Player.None;
+        }
+
+        FlagFell?.Invoke(flagged);
+    }
+    
+    #endregion
 }
