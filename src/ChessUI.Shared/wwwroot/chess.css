@@ -185,3 +185,79 @@ body {
         height: 36px;
         margin: 0;
     }
+
+
+/* ---------- Chess clock ---------- */
+
+/* With a clock the frame is a little smaller, so that board and both clocks fit on the screen */
+.chess-wrapper.with-clock {
+    width: min(72vmin, 640px);
+}
+
+.clock {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 6px 0;
+    padding: 4px 14px;
+    background: rgba(56, 4, 4, 0.8);
+    border: 3px solid #260000;
+    border-radius: 8px;
+    color: #ffa274;
+    opacity: 0.7;
+}
+
+.clock-name {
+    font-size: 15px;
+}
+
+.clock-time {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 28px;
+    font-variant-numeric: tabular-nums;
+}
+
+.clock.running {
+    opacity: 1;
+    border-color: #ffa274;
+}
+
+.clock.low .clock-time {
+    color: #ff5a4d;
+}
+
+/* Selection of the time control in the menus */
+.menu-hint {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    opacity: 0.85;
+    text-align: center;
+}
+
+.time-picker {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin: 0 0 16px 0;
+}
+
+.time-option {
+    padding: 6px 12px;
+    font-family: inherit;
+    font-size: 14px;
+    color: #ffa274;
+    background: #730909;
+    border: 2px solid #260000;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.time-option:hover {
+    background: #8c0d0d;
+}
+
+.time-option.selected {
+    color: #260000;
+    background: #ffa274;
+}

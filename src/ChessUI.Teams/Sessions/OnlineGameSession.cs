@@ -1,4 +1,5 @@
-﻿using ChessLogic.Enums;
+﻿using ChessLogic.Clock;
+using ChessLogic.Enums;
 using ChessLogic.Model;
 using ChessLogic.Model.Game;
 using ChessLogic.Moves;
@@ -34,6 +35,9 @@ public sealed class OnlineGameSession : IGameSession, IDisposable
     public bool IsGameOver => match.Snapshot.Status == MatchStatus.Finished;
     public bool IsLocalTurn => HasStarted && !IsGameOver && CurrentPlayer == LocalPlayer;
     public bool CanResign => HasStarted && !IsGameOver;
+
+    /// <summary>The chess clock of the match, or null if it is played without a clock</summary>
+    public ClockSnapshot Clock => match.Snapshot.Clock;
 
     public IEnumerable<Move> LegalMovesFor(Position pos) => match.LegalMovesFor(userId, pos);
 

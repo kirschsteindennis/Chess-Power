@@ -1,5 +1,6 @@
 ﻿@page "/"
 @implements IDisposable
+@using ChessLogic.Clock
 @using Microsoft.Extensions.Hosting
 @inject IJSRuntime JS
 @inject MatchService Matches
@@ -22,7 +23,20 @@ else if (context is null)
 }
 else if (session is null)
 {
+    WaitingMatch waiting = waiting;
+
     <MenuPanel Title="Chess Power">
+        @if (waiting is not null)
+        {
+            @* Somebody else has opened a game: whoever joins plays with its time control *@
+            <p class="menu-hint">A game is waiting in this chat (@DescribeClock(waiting.Control)). Joining plays with this time control</p>
+        }
+        else
+        {
+            <p class="menu-hint">Time control</p>
+            <TimeControlPicker @bind-Value="selectedControl" />
+        }
+
         <MenuButton Text="Find Opponent" OnClick="FindOpponent" />
         @if (message is not null)
         {
@@ -34,6 +48,7 @@ else if (!session.HasStarted)
 {
     <MenuPanel Title="Waiting...">
         <p class="menu-reason">Waiting for another person in this chat to open the game</p>
+        <p class="menu-hint">Time control: @DescribeClock(selectedControl)</p>
         <MenuButton Text="Cancel" OnClick="CancelWaiting"/>
     </MenuPanel>
 }
@@ -71,6 +86,12 @@ else
     private OnlineGameSession session;
     private string message;
     private bool confirmResign;
+    private TimeControl selectedControl;        // null = no clock
+
+    // A game of somebody else that waits in this chat, or null
+    private WaitingMatch Waiting => context is null ? null : Matches.FindWaiting(context.ChatId, context.UserId);
+
+    private static string DescribeClock(TimeControl control) => control is null ? "no clock" : control.Label;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -79,6 +100,11 @@ else
 
         context = await LoadContextAsync();
         contextLoaded = true;
+
+        // Another person may open a game in this chat while this screen shows the menu
+        if (context is not null)
+            Matches.WaitingChanged += OnWaitingChanged;
+
         StateHasChanged();
     }
 
@@ -168,5 +194,16 @@ else
     // The event comes from the other player's connection, so we must switch to our own render thread
     private void OnSessionChanged() => _ = InvokeAsync(StateHasChanged);
 
-    public void Dispose() => Leave();
+    // Only the chat of this screen is of interest
+    private void OnWaitingChanged(string chatId)
+    {
+        if (context is not null && chatId == context.ChatId)
+            _ = InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Matches.WaitingChanged -= OnWaitingChanged;
+        Leave();
+    }
 }

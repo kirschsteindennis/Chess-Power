@@ -31,6 +31,7 @@ try
 
     builder.Services.AddSingleton<IRandomSource, SystemRandomSource>();
 
+    builder.Services.AddSingleton(TimeProvider.System);
     builder.Services.AddSingleton<MatchService>();
 
     // The signing keys of Microsoft's identity platform. The manager caches them and refreshes them from time to time.
