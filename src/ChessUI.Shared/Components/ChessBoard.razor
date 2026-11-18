@@ -1,6 +1,12 @@
 ﻿@implements IDisposable
 
-<div class="chess-wrapper">
+<div class="@WrapperClass">
+    @if (Session.Clock is not null)
+    {
+        @* The clock of the opponent is above the board, the own clock below it *@
+        <ChessClockView Clock="Session.Clock" Side="OpponentSide" />
+    }
+
     <div class="chess-board">
         @foreach (int r in Indices)
         {
@@ -22,6 +28,11 @@
             }
         }
     </div>
+
+    @if (Session.Clock is not null)
+    {
+        <ChessClockView Clock="Session.Clock" Side="Session.LocalPlayer" IsLocal="true" />
+    }
 
     @if (promotionPending)
     {
@@ -51,6 +62,11 @@
     private IEnumerable<int> Indices => Session.LocalPlayer == Player.Black
             ? Enumerable.Range(0, 8).Reverse()
             : Enumerable.Range(0, 8);
+
+    // With a clock the board is a little smaller, so that board and both clocks fit on the screen
+    private string WrapperClass => Session.Clock is null ? "chess-wrapper" : "chess-wrapper with-clock";
+
+    private Player OpponentSide => Session.LocalPlayer.Opponent();
 
     private string StatusText
     {

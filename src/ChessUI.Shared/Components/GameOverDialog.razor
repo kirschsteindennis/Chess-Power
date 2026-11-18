@@ -31,6 +31,8 @@
         EndReason.Stalemate => $"STALEMATE - {PlayerString(currentPlayer)} CAN'T MOVE",
         EndReason.Checkmate => $"CHECKMATE - {PlayerString(currentPlayer)} CAN'T MOVE",
         EndReason.Resignation => $"{PlayerString(result.Winner.Opponent())} RESIGNED",
+        EndReason.Timeout => $"{PlayerString(result.Winner.Opponent())} RAN OUT OF TIME",
+        EndReason.TimeoutInsufficientMaterial => $"TIME OUT - NO MATING MATERIAL",
         EndReason.FiftyMoveRule => "FIFTY-MOVE RULE",
         EndReason.InsufficientMaterial => "INSUFFICIENT MATERIAL",
         EndReason.ThreefoldRepetition => "THREEFOLD REPETITION",

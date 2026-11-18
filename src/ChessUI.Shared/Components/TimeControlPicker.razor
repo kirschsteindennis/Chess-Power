@@ -1,0 +1,21 @@
+﻿<div class="time-picker">
+    <button type="button" class="@OptionClass(null)" @onclick="() => Select(null)">No clock</button>
+
+    @foreach (TimeControl control in TimeControl.Presets)
+    {
+        TimeControl current = control;
+
+        <button type="button" class="@OptionClass(current)" title="@current.Label" @onclick="() => Select(current)">@current.Name</button>
+    }
+</div>
+
+@code {
+    /// <summary>The chosen time control, or null for "no clock"</summary>
+    [Parameter] public TimeControl Value { get; set; }
+
+    [Parameter] public EventCallback<TimeControl> ValueChanged { get; set; }
+
+    private string OptionClass(TimeControl control) => Equals(control, Value) ? "time-option selected" : "time-option";
+
+    private Task Select(TimeControl control) => ValueChanged.InvokeAsync(control);
+}

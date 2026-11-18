@@ -1,0 +1,83 @@
+﻿@implements IDisposable
+@inject IServiceProvider Services
+
+<div class="@CssClass">
+    <span class="clock-name">@Name</span>
+    <span class="clock-time">@ClockFormat.Format(Remaining)</span>
+</div>
+
+@code {
+    // A running clock redraws itself this often. The text only changes about once a second
+    // (ten times a second in the last 10 seconds), and only a changed text is sent to the browser.
+    private static readonly TimeSpan Tick => TimeSpan.FromMilliseconds(100);
+
+    /// <summary>The state of the clock. It is replaced after every move</summary>
+    [Parameter, EditorRequired] public ClockSnapshot Clock { get; set; }
+
+    /// <summary>Whose time this clock shows</summary>
+    [Parameter, EditorRequired] public Player Side { get; set; }
+
+    /// <summary>True for the clock of the player who sits at this screen</summary>
+    [Parameter] public bool IsLocal { get; set; }
+
+    private TimeProvider time;
+    private ITimer timer;
+    private bool disposed;
+
+    /// <summary>The program may register its own TimeProvider (tests do). Without one the real time is used.</summary>
+    private TimeProvider Time => time ??= Services.GetService(typeof(TimeProvider)) as TimeProvider ?? TimeProvider.System;
+
+    private TimeSpan Remaining => Clock.RemainingOf(Side, Time.GetTimestamp());
+
+    private bool IsRunning => Clock.Running == Side;
+
+    private string Name => (Side == Player.White ? "White" : "Black") + (IsLocal ? " (you)" : "");
+
+    private string CssClass
+    {
+        get
+        {
+            string css = "clock";
+
+            if (IsRunning) css += " running";
+            if (ClockFormat.IsLow(Remaining, Clock.Control.Initial)) css += " low";
+            if (IsLocal) css += " local";
+
+            return css;
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        // Only the clock that is running needs to be redrawn all the time
+        if (IsRunning && timer is null && !disposed)
+            timer = Time.CreateTimer(_ => Redraw(), null, Tick, Tick);
+        else if (!IsRunning && timer is not null)
+        {
+            timer.Dispose();
+            timer = null;
+        }
+    }
+
+    private void Redraw()
+    {
+        if (disposed)
+            return;
+
+        try
+        {
+            _ = InvokeAsync(StateHasChanged);
+        }
+        catch (ObjectDisposedException)
+        {
+            // the page was closed in the same moment
+        }
+    }
+
+    public void Dispose()
+    {
+        disposed = true;
+        timer?.Dispose();
+        timer = null;
+    }
+}
