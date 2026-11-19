@@ -527,4 +527,29 @@ public class ChessClockTests
     }
 
     #endregion
+
+    #region Disposing
+
+    [Test]
+    public void Dispose_StopsTheTimerSoThatNoFlagCanComeAnyMore()
+    {
+        // Arrange
+        ChessClock clock = NewClock(5);
+        clock.Start(Player.White);
+
+        // Act
+        clock.Dispose();
+        int timersRightAfterwards = time.ActiveTimerCount;
+        time.Advance(Seconds(1000));
+
+        // Assert
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(timersRightAfterwards, Is.EqualTo(0), "the timer must be released at once, not when it would have fired");
+            Assert.That(flags, Is.Empty);
+            Assert.That(time.ActiveTimerCount, Is.Zero);
+        }
+    }
+
+    #endregion
 }
