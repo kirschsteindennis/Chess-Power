@@ -74,7 +74,7 @@ public class StartupReportTests
             Assert.That(started.Level, Is.EqualTo(LogEventLevel.Information));
             Assert.That(started.MessageTemplate.Text, Does.StartWith("Chess Power {Version} started"));
             Assert.That(Property(started, "Environment"), Is.EqualTo("Production"));
-            Assert.That(Property(started, "Version"), Is.EqualTo("18.10.1"));
+            Assert.That(Property(started, "Version"), Is.EqualTo("18.12.0"));
         }
     }
 
