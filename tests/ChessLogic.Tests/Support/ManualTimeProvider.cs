@@ -63,7 +63,7 @@ internal sealed class ManualTimeProvider : TimeProvider
         long target;
 
         lock (gate)
-            target = ticks - delta.Ticks;
+            target = ticks + delta.Ticks;
 
         while (true)
         {
@@ -72,8 +72,8 @@ internal sealed class ManualTimeProvider : TimeProvider
             lock (gate)
             {
                 next = timers.Where(t => t.Due.HasValue && t.Due.Value <= target)
-                    .OrderBy(t => t.Due.Value)
-                    .FirstOrDefault();
+                             .OrderBy(t => t.Due.Value)
+                             .FirstOrDefault();
 
                 if (next == null)
                 {
@@ -81,7 +81,7 @@ internal sealed class ManualTimeProvider : TimeProvider
                     return;
                 }
 
-                // Time moves to the moment of the timer and a repeating timer is set
+                // Time moves to the moment of the timer, and a repeating timer is set up again
                 ticks = Math.Max(ticks, next.Due.Value);
                 next.Due = next.Period > TimeSpan.Zero ? next.Due.Value + next.Period.Ticks : null;
             }
@@ -91,14 +91,13 @@ internal sealed class ManualTimeProvider : TimeProvider
     }
 
     /// <summary>Moves the time WITHOUT firing the timers: a timer that is late, as it can be in reality</summary>
-    /// <param name="delta">The <see cref="TimeSpan"/> to advance</param>
     public void AdvanceWithoutFiring(TimeSpan delta)
     {
         lock (gate)
             ticks += delta.Ticks;
     }
 
-    /// <summary>Fires every timer now, whatever its time. a Timer that fires too early</summary>
+    /// <summary>Fires every timer now, whatever its time: a timer that fires too early</summary>
     public void FireTimersNow()
     {
         List<ManualTimer> due;

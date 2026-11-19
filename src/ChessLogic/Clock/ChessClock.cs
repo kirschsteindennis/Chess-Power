@@ -14,10 +14,12 @@ public sealed class ChessClock : IDisposable
     private readonly TimeProvider time;
     private readonly ITimer timer;
 
-    private TimeSpan white, black;
+    private TimeSpan white;
+    private TimeSpan black;
     private Player running = Player.None;
     private long startedAt;
-    private bool stopped, disposed;
+    private bool stopped;
+    private bool disposed;
 
     public ChessClock(TimeControl control, TimeProvider timeProvider)
     {
@@ -50,9 +52,8 @@ public sealed class ChessClock : IDisposable
 
     /// <summary>
     /// Starts the clock of the player who has to move first.
-    /// Does nothing if the clock was started before, or if it was stopped
+    /// Does nothing if the clock was started before, or if it was stopped.
     /// </summary>
-    /// <param name="first">The Player</param>
     public void Start(Player first)
     {
         lock (gate)
@@ -69,7 +70,6 @@ public sealed class ChessClock : IDisposable
     /// <summary>
     /// The player has moved: his time is stopped, the increment is added, and the clock of the opponent starts.
     /// </summary>
-    /// <param name="mover">The Player that made the move</param>
     /// <returns>False if the time of the player was already over. Then the clock stops and nothing is added.</returns>
     public bool Press(Player mover)
     {
@@ -97,7 +97,7 @@ public sealed class ChessClock : IDisposable
         }
     }
 
-    /// <summary>Stops the clock for good, for example when the match is over.The times stay as they are.</summary>
+    /// <summary>Stops the clock for good, for example when the match is over. The times stay as they are.</summary>
     public void Stop()
     {
         lock (gate)
@@ -115,11 +115,7 @@ public sealed class ChessClock : IDisposable
         }
     }
 
-    /// <summary>
-    /// True if the clock of this player is running and his time is over (the timer may not have fired yet)
-    /// </summary>
-    /// <param name="player">The Player requesting</param>
-    /// <returns>True if the Clock is running and time is over</returns>
+    /// <summary>True if the clock of this player is running and his time is over (the timer may not have fired yet)</summary>
     public bool IsExpired(Player player)
     {
         lock (gate)
@@ -150,7 +146,7 @@ public sealed class ChessClock : IDisposable
         }
     }
 
-    #region Private Methods
+    // ---------- Everything below is only called inside the lock ----------
 
     private TimeSpan RemainingNoLock(Player player)
     {
@@ -187,7 +183,7 @@ public sealed class ChessClock : IDisposable
 
             TimeSpan left = RemainingNoLock(running);
 
-            // The Timer can fire a moment too early, wait for the rest
+            // The timer can fire a moment too early: then wait for the rest
             if (left > TimeSpan.Zero)
             {
                 timer.Change(left, Timeout.InfiniteTimeSpan);
@@ -201,6 +197,4 @@ public sealed class ChessClock : IDisposable
 
         FlagFell?.Invoke(flagged);
     }
-    
-    #endregion
 }
