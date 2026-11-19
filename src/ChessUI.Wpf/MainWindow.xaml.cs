@@ -18,6 +18,8 @@ public partial class MainWindow : Window
             services.AddBlazorWebViewDeveloperTools(); // Use F12 to open dev tools
 #endif
 
+        services.AddSingleton(TimeProvider.System);
+
         // The Blazor part writes into the same log files as the rest of the program
         services.AddLogging(logging =>
         {

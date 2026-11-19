@@ -9,7 +9,7 @@
 @code {
     // A running clock redraws itself this often. The text only changes about once a second
     // (ten times a second in the last 10 seconds), and only a changed text is sent to the browser.
-    private static readonly TimeSpan Tick => TimeSpan.FromMilliseconds(100);
+    private static TimeSpan Tick => TimeSpan.FromMilliseconds(100);
 
     /// <summary>The state of the clock. It is replaced after every move</summary>
     [Parameter, EditorRequired] public ClockSnapshot Clock { get; set; }

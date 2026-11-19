@@ -1,7 +1,12 @@
+@implements IDisposable
+@using ChessLogic.Clock;
 @using Microsoft.Extensions.Logging
 
 @if (session is null) {
     <MenuPanel Title="Chess Power">
+        <p class="menu-hint">Time control</p>
+        <TimeControlPicker @bind-value="control" />
+
         <MenuButton Text="Easy" OnClick="() => Start(AIDifficulty.Easy)"/>
         <MenuButton Text="Medium" OnClick="() => Start(AIDifficulty.Medium)"/>
         <MenuButton Text="Hard" OnClick="() => Start(AIDifficulty.Hard)"/>
@@ -21,10 +26,20 @@ else {
     @inject ILogger<AiGameSession> SessionLogger
 
     private IGameSession session;
+    private TimeControl control;        // null = no clock
 
     private void Start(AIDifficulty difficulty) => session = new AiGameSession(difficulty, SessionLogger);
 
     private void BackToMenu() => session = null;
 
+    // The session holds the timer of the clock, so it has to be disposed
+    private void Release()
+    {
+        (session as IDisposable)?.Dispose();
+        session = null;
+    }
+
     private void Quit() => System.Windows.Application.Current.Shutdown();
+
+    public void Dispose() => Release();
 }
