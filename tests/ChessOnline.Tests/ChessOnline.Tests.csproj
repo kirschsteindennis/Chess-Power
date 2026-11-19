@@ -28,6 +28,10 @@
   </ItemGroup>
 
   <ItemGroup>
+	<Compile Include="..\ChessLogic.Tests\Support\ManualTimeProvider.cs" Link="Support\ManualTimeProvider.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="NUnit.Framework" />
   </ItemGroup>
 
